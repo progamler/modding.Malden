@@ -34,15 +34,19 @@ _connect = addMissionEventHandler ["PlayerConnected",
   if((isServer)) then {
     diag_log _name;
     diag_log _uid;
+    diag_log _owner;
+    diag_log _jip;
+    diag_log _idstr;
+    diag_log _this;
     _ret = call compile ("extDB3" callExtension format ["0:custom4:getPlayer:%1", _uid]);
     _m_uid = (_ret select 1);
-    _emtpyarr = [[""],[""]];
+    _emtpyarr = [];
     diag_log "same?";
     diag_log _emtpyarr;
     diag_log _m_uid;
     if(_m_uid isEqualTo _emtpyarr ) then {
       diag_log "added to mysql";
-      _ret1 = call compile ("extDB3" callExtension format ["1:SQL3:INSERT INTO main_Player(UID,name) VALUES('%1','%2');", _uid, _name]);
+      _ret1 = call compile ("extDB3" callExtension format ["1:SQL3:INSERT INTO main_player(UID,name) VALUES('%1','%2');", _uid, _name]);
     } else {
       diag_log "already in mysql hust";
       _ret2 = call compile ("extDB3" callExtension format ["0:custom4:getItems:%1", _uid]);
@@ -66,10 +70,13 @@ addMissionEventHandler ["EntityKilled",
 	if (isNull _instigator) then {_instigator = UAVControl vehicle _killer select 0}; // UAV/UGV player operated road kill
 	if (isNull _instigator) then {_instigator = _killer}; // player driven vehicle road kill
   _uid = getPlayerUID _instigator;
-  if (side player == civilian) then {
+  systemChat str(side _killed);
+  systemChat str(side _killer);
+  systemChat str(side _instigator);
+  if (side _killed == civilian ) then {
     if(player isEqualTo _instigator) then {
       if(player isNotEqualTo _killed) then {
-     // systemChat "Confirmed CIV Kill, -100MC";
+      systemChat "Confirmed CIV Kill, -100MC";
       _kill_enemy = [_uid, "-100"] remoteExec ["updateWallet", 2];
       diag_log "after call";
       diag_log _kill_enemy;
@@ -78,7 +85,7 @@ addMissionEventHandler ["EntityKilled",
     }
   } else {
     if(player isEqualTo _instigator) then {
-    //  systemChat "Confirmed Kill, +10MC";
+      systemChat "Confirmed Kill, +10MC";
       diag_log "before call";
       _uid = getPlayerUID _instigator;
       _kill_enemy = [_uid, "+10"] remoteExec ["updateWallet", 2];
